@@ -1,6 +1,6 @@
-import { Response, NextFunction } from 'express';
-import { Role } from '@prisma/client';
+import { NextFunction, Response } from 'express';
 import { AuthenticatedRequest } from './requireAuth';
+import { Role } from '@prisma/client';
 
 export const requireRole = (roles: Role[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
