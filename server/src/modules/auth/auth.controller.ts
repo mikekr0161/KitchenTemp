@@ -67,7 +67,7 @@ export const login = async (req: Request, res: Response) => {
     // In a real application, you would store the refresh token in the database
     // For simplicity, we are not doing that here yet.
 
-    res.json({ data: { accessToken, refreshToken } });
+    res.json({ data: { accessToken, refreshToken, user: { id: user.id, organisationId: user.organisation_id, role: user.global_role } } });
   } catch (error) {
     res.status(400).json({ error });
   }

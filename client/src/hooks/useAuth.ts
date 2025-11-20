@@ -12,6 +12,10 @@ export const useAuth = () => {
     onSuccess: (data) => {
       localStorage.setItem('accessToken', data.data.accessToken);
       localStorage.setItem('refreshToken', data.data.refreshToken);
+      if (data.data.user) {
+        localStorage.setItem('userId', data.data.user.id);
+        localStorage.setItem('organisationId', data.data.user.organisationId);
+      }
       queryClient.invalidateQueries({ queryKey: ['user'] });
       navigate('/');
     },
