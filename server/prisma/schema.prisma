@@ -12,14 +12,14 @@ datasource db {
 
 // 1. Organisations & Locations
 model Organisation {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   name          String
-  billing_email String    @unique
+  billing_email String   @unique
   plan          String
   timezone      String
   settings_json Json?
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
   locations           Location[]
   users               User[]
@@ -28,32 +28,43 @@ model Organisation {
   suppliers           Supplier[]
   ingredients         Ingredient[]
   training_modules    TrainingModule[]
+  documents           Document[]
+  audit_templates     AuditTemplate[]
+  incidents           IncidentReport[]
+  correctiveActions   CorrectiveAction[]
+  devices             Device[]
 }
 
 model Location {
-  id              String    @id @default(uuid())
+  id              String   @id @default(uuid())
   organisation_id String
   name            String
   address         String
   city            String
   postcode        String
   country         String
-  active          Boolean   @default(true)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  active          Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
-  organisation        Organisation        @relation(fields: [organisation_id], references: [id])
-  user_locations      UserLocation[]
-  equipment           Equipment[]
-  checklist_templates ChecklistTemplate[]
-  checklist_runs      ChecklistRun[]
-  hygiene_scores      HygieneScore[]
-  stock_batches       StockBatch[]
-  waste_logs          WasteLog[]
-  menu_items          MenuItem[]
-  shift_templates     ShiftTemplate[]
-  shifts              Shift[]
-  venue_scores        VenueScore[]
+  organisation             Organisation              @relation(fields: [organisation_id], references: [id])
+  user_locations           UserLocation[]
+  equipment                Equipment[]
+  checklist_templates      ChecklistTemplate[]
+  checklist_runs           ChecklistRun[]
+  hygiene_scores           HygieneScore[]
+  stock_batches            StockBatch[]
+  waste_logs               WasteLog[]
+  menu_items               MenuItem[]
+  shift_templates          ShiftTemplate[]
+  shifts                   Shift[]
+  venue_scores             VenueScore[]
+  document_assignments     DocumentAssignment[]
+  audits                   Audit[]
+  incidents                IncidentReport[]
+  daily_timesheets         DailyTimesheet[]
+  documentAcknowledgements DocumentAcknowledgement[]
+  devices                  Device[]
 }
 
 // 2. Users & Roles
@@ -66,42 +77,51 @@ enum Role {
 }
 
 model User {
-  id              String    @id @default(uuid())
+  id              String   @id @default(uuid())
   organisation_id String
-  email           String    @unique
+  email           String   @unique
   password_hash   String
   first_name      String
   last_name       String
   phone           String?
   avatar_url      String?
-  global_role     Role      @default(STAFF)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  global_role     Role     @default(STAFF)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
-  organisation            Organisation            @relation(fields: [organisation_id], references: [id])
-  user_locations          UserLocation[]
-  sessions                Session[]
-  temperature_logs        TemperatureLog[]
-  checklist_runs          ChecklistRun[]
-  checklist_run_items     ChecklistRunItem[]
-  policy_acknowledgements PolicyAcknowledgement[]
-  stock_movements         StockMovement[]
-  waste_logs              WasteLog[]
-  live_menu_statuses      LiveMenuStatus[]
-  staff_profile           StaffProfile?
-  shifts                  Shift[]
-  time_entries_clock_in   TimeEntry[]             @relation("ClockInUser")
-  time_entries_approved   TimeEntry[]             @relation("ApprovedByUser")
-  availability_slots      AvailabilitySlot[]
-  training_assignments    TrainingAssignment[]
-  gamification_points     GamificationPoint[]
-  notifications           Notification[]
+  organisation                Organisation              @relation(fields: [organisation_id], references: [id])
+  user_locations              UserLocation[]
+  sessions                    Session[]
+  temperature_logs            TemperatureLog[]
+  checklist_runs              ChecklistRun[]
+  checklist_run_items         ChecklistRunItem[]
+  policy_acknowledgements     PolicyAcknowledgement[]
+  stock_movements             StockMovement[]
+  waste_logs                  WasteLog[]
+  live_menu_statuses          LiveMenuStatus[]
+  staff_profile               StaffProfile?
+  shifts                      Shift[]
+  time_entries_clock_in       TimeEntry[]               @relation("ClockInUser")
+  time_entries_approved       TimeEntry[]               @relation("ApprovedByUser")
+  availability_slots          AvailabilitySlot[]
+  training_assignments        TrainingAssignment[]
+  gamification_points         GamificationPoint[]
+  notifications               Notification[]
+  document_versions           DocumentVersion[]
+  corrective_actions_assigned CorrectiveAction[]        @relation("AssignedActions")
+  corrective_actions_created  CorrectiveAction[]        @relation("CreatedActions")
+  audits_performed            Audit[]                   @relation("AuditPerformed")
+  timesheets_owned            DailyTimesheet[]          @relation("TimesheetOwner")
+  timesheets_approved         DailyTimesheet[]          @relation("TimesheetApprovedBy")
+  documentAcknowledgements    DocumentAcknowledgement[]
+  incidentReports             IncidentReport[]
+  temperatureReadings         TemperatureReading[]
 }
 
 model UserLocation {
   user_id     String
   location_id String
-  role        Role     @default(STAFF)
+  role        Role   @default(STAFF)
 
   user     User     @relation(fields: [user_id], references: [id])
   location Location @relation(fields: [location_id], references: [id])
@@ -129,18 +149,18 @@ enum EquipmentType {
 }
 
 model Equipment {
-  id                String   @id @default(uuid())
-  location_id       String
-  name              String
-  type              EquipmentType
-  target_temp_min   Float?
-  target_temp_max   Float?
-  active            Boolean  @default(true)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  id              String        @id @default(uuid())
+  location_id     String
+  name            String
+  type            EquipmentType
+  target_temp_min Float?
+  target_temp_max Float?
+  active          Boolean       @default(true)
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
 
-  location          Location         @relation(fields: [location_id], references: [id])
-  temperature_logs  TemperatureLog[]
+  location         Location         @relation(fields: [location_id], references: [id])
+  temperature_logs TemperatureLog[]
 }
 
 model TemperatureLog {
@@ -184,8 +204,8 @@ model ChecklistTemplate {
   created_at      DateTime          @default(now())
   updated_at      DateTime          @updatedAt
 
-  organisation Organisation  @relation(fields: [organisation_id], references: [id])
-  location     Location?     @relation(fields: [location_id], references: [id])
+  organisation Organisation    @relation(fields: [organisation_id], references: [id])
+  location     Location?       @relation(fields: [location_id], references: [id])
   items        ChecklistItem[]
   runs         ChecklistRun[]
 }
@@ -201,7 +221,7 @@ model ChecklistItem {
   created_at            DateTime @default(now())
   updated_at            DateTime @updatedAt
 
-  template          ChecklistTemplate   @relation(fields: [checklist_template_id], references: [id])
+  template            ChecklistTemplate  @relation(fields: [checklist_template_id], references: [id])
   checklist_run_items ChecklistRunItem[]
 }
 
@@ -223,14 +243,14 @@ model ChecklistRun {
   created_at            DateTime           @default(now())
   updated_at            DateTime           @updatedAt
 
-  template      ChecklistTemplate  @relation(fields: [checklist_template_id], references: [id])
-  location      Location           @relation(fields: [location_id], references: [id])
-  started_by    User               @relation(fields: [started_by_user_id], references: [id])
-  run_items     ChecklistRunItem[]
+  template   ChecklistTemplate  @relation(fields: [checklist_template_id], references: [id])
+  location   Location           @relation(fields: [location_id], references: [id])
+  started_by User               @relation(fields: [started_by_user_id], references: [id])
+  run_items  ChecklistRunItem[]
 }
 
 model ChecklistRunItem {
-  id                 String   @id @default(uuid())
+  id                 String    @id @default(uuid())
   checklist_run_id   String
   checklist_item_id  String
   checked_by_user_id String?
@@ -238,26 +258,27 @@ model ChecklistRunItem {
   value              String? // Can be BOOLEAN, TEXT, etc.
   notes              String?
   photo_url          String?
-  created_at         DateTime @default(now())
-  updated_at         DateTime @updatedAt
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
 
-  checklist_run  ChecklistRun  @relation(fields: [checklist_run_id], references: [id])
-  checklist_item ChecklistItem @relation(fields: [checklist_item_id], references: [id])
-  checked_by     User?         @relation(fields: [checked_by_user_id], references: [id])
+  checklist_run     ChecklistRun       @relation(fields: [checklist_run_id], references: [id])
+  checklist_item    ChecklistItem      @relation(fields: [checklist_item_id], references: [id])
+  checked_by        User?              @relation(fields: [checked_by_user_id], references: [id])
+  correctiveActions CorrectiveAction[]
 }
 
 // 4. Hygiene Scoring & Compliance
 model HygieneScore {
-  id                String   @id @default(uuid())
-  location_id       String
-  period_start      DateTime
-  period_end        DateTime
-  compliance_score  Float
-  completion_rate   Float
-  issue_count       Int
-  notes             String?
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  id               String   @id @default(uuid())
+  location_id      String
+  period_start     DateTime
+  period_end       DateTime
+  compliance_score Float
+  completion_rate  Float
+  issue_count      Int
+  notes            String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 
   location Location @relation(fields: [location_id], references: [id])
 }
@@ -271,30 +292,96 @@ enum PolicyCategory {
 }
 
 model PolicyDocument {
-  id              String   @id @default(uuid())
+  id              String         @id @default(uuid())
   organisation_id String
   title           String
   category        PolicyCategory
   file_url        String?
   content         String?
   version         String
-  is_published    Boolean  @default(false)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  is_published    Boolean        @default(false)
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
 
   organisation     Organisation            @relation(fields: [organisation_id], references: [id])
   acknowledgements PolicyAcknowledgement[]
 }
 
 model PolicyAcknowledgement {
-  id                  String   @id @default(uuid())
-  policy_document_id  String
-  user_id             String
-  acknowledged_at     DateTime
-  created_at          DateTime @default(now())
+  id                 String   @id @default(uuid())
+  policy_document_id String
+  user_id            String
+  acknowledged_at    DateTime
+  created_at         DateTime @default(now())
 
   policy_document PolicyDocument @relation(fields: [policy_document_id], references: [id])
   user            User           @relation(fields: [user_id], references: [id])
+}
+
+// 4b. Compliance documents & acknowledgements
+model DocumentCategory {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  documents   Document[]
+}
+
+model Document {
+  id                 String   @id @default(uuid())
+  organisation_id    String
+  category_id        String
+  title              String
+  description        String?
+  current_version_id String?  @unique
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  organisation    Organisation         @relation(fields: [organisation_id], references: [id])
+  category        DocumentCategory     @relation(fields: [category_id], references: [id])
+  versions        DocumentVersion[]
+  assignments     DocumentAssignment[]
+  current_version DocumentVersion?     @relation("CurrentDocumentVersion", fields: [current_version_id], references: [id])
+}
+
+model DocumentVersion {
+  id             String    @id @default(uuid())
+  document_id    String
+  version_number Int
+  uploaded_by    String
+  file_url       String?
+  content        String?
+  effective_from DateTime
+  effective_to   DateTime?
+  change_log     String?
+  created_at     DateTime  @default(now())
+
+  document            Document                  @relation(fields: [document_id], references: [id])
+  uploaded_by_user    User                      @relation(fields: [uploaded_by], references: [id])
+  acknowledgements    DocumentAcknowledgement[]
+  document_as_current Document?                 @relation("CurrentDocumentVersion")
+}
+
+model DocumentAssignment {
+  id          String   @id @default(uuid())
+  document_id String
+  location_id String?
+  role        Role?
+  created_at  DateTime @default(now())
+
+  document Document  @relation(fields: [document_id], references: [id])
+  location Location? @relation(fields: [location_id], references: [id])
+}
+
+model DocumentAcknowledgement {
+  id                  String   @id @default(uuid())
+  document_version_id String
+  user_id             String
+  acknowledged_at     DateTime @default(now())
+  location_id         String?
+
+  document_version DocumentVersion @relation(fields: [document_version_id], references: [id])
+  user             User            @relation(fields: [user_id], references: [id])
+  location         Location?       @relation(fields: [location_id], references: [id])
 }
 
 // 5. Inventory & Intelligence
@@ -320,7 +407,7 @@ model Ingredient {
   created_at            DateTime @default(now())
   updated_at            DateTime @updatedAt
 
-  organisation          Organisation           @relation(fields: [organisation_id], references: [id])
+  organisation          Organisation         @relation(fields: [organisation_id], references: [id])
   stock_batches         StockBatch[]
   waste_logs            WasteLog[]
   menu_item_ingredients MenuItemIngredient[]
@@ -338,8 +425,8 @@ model StockBatch {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  location   Location   @relation(fields: [location_id], references: [id])
-  ingredient Ingredient @relation(fields: [ingredient_id], references: [id])
+  location   Location        @relation(fields: [location_id], references: [id])
+  ingredient Ingredient      @relation(fields: [ingredient_id], references: [id])
   movements  StockMovement[]
 }
 
@@ -371,46 +458,46 @@ enum WasteType {
 }
 
 model WasteLog {
-  id                  String     @id @default(uuid())
-  location_id         String
-  ingredient_id       String?
-  menu_item_id        String?
-  type                WasteType
-  estimated_quantity  Float
-  estimated_cost      Float
-  logged_by_user_id   String
-  logged_at           DateTime
-  notes               String?
-  created_at          DateTime   @default(now())
+  id                 String    @id @default(uuid())
+  location_id        String
+  ingredient_id      String?
+  menu_item_id       String?
+  type               WasteType
+  estimated_quantity Float
+  estimated_cost     Float
+  logged_by_user_id  String
+  logged_at          DateTime
+  notes              String?
+  created_at         DateTime  @default(now())
 
-  location      Location    @relation(fields: [location_id], references: [id])
-  ingredient    Ingredient? @relation(fields: [ingredient_id], references: [id])
-  menu_item     MenuItem?   @relation(fields: [menu_item_id], references: [id])
-  logged_by     User        @relation(fields: [logged_by_user_id], references: [id])
+  location   Location    @relation(fields: [location_id], references: [id])
+  ingredient Ingredient? @relation(fields: [ingredient_id], references: [id])
+  menu_item  MenuItem?   @relation(fields: [menu_item_id], references: [id])
+  logged_by  User        @relation(fields: [logged_by_user_id], references: [id])
 }
 
 // 6. Menu & Allergens
 model Allergen {
-  id                String   @id @default(uuid())
-  name              String   @unique
+  id                  String             @id @default(uuid())
+  name                String             @unique
   menu_item_allergens MenuItemAllergen[]
 }
 
 model MenuItem {
-  id              String   @id @default(uuid())
-  location_id     String
-  name            String
-  description     String?
-  price           Float
-  is_active       Boolean  @default(true)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id          String   @id @default(uuid())
+  location_id String
+  name        String
+  description String?
+  price       Float
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
-  location          Location               @relation(fields: [location_id], references: [id])
-  waste_logs        WasteLog[]
-  ingredients       MenuItemIngredient[]
-  allergens         MenuItemAllergen[]
-  live_menu_status  LiveMenuStatus?
+  location         Location             @relation(fields: [location_id], references: [id])
+  waste_logs       WasteLog[]
+  ingredients      MenuItemIngredient[]
+  allergens        MenuItemAllergen[]
+  live_menu_status LiveMenuStatus?
 }
 
 model MenuItemIngredient {
@@ -435,12 +522,12 @@ model MenuItemAllergen {
 }
 
 model LiveMenuStatus {
-  menu_item_id          String    @id
-  is_available          Boolean   @default(true)
+  menu_item_id            String   @id
+  is_available            Boolean  @default(true)
   last_updated_by_user_id String
-  last_updated_at       DateTime
+  last_updated_at         DateTime
 
-  menu_item      MenuItem @relation(fields: [menu_item_id], references: [id])
+  menu_item       MenuItem @relation(fields: [menu_item_id], references: [id])
   last_updated_by User     @relation(fields: [last_updated_by_user_id], references: [id])
 }
 
@@ -458,14 +545,14 @@ model StaffProfile {
 }
 
 model ShiftTemplate {
-  id                String   @id @default(uuid())
-  location_id       String
-  name              String
+  id                 String   @id @default(uuid())
+  location_id        String
+  name               String
   default_start_time String // "HH:mm"
   default_end_time   String // "HH:mm"
-  default_role      Role
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  default_role       Role
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
 
   location Location @relation(fields: [location_id], references: [id])
 }
@@ -517,9 +604,9 @@ model TimeEntry {
   created_at          DateTime      @default(now())
   updated_at          DateTime      @updatedAt
 
-  shift          Shift @relation(fields: [shift_id], references: [id])
-  user           User  @relation("ClockInUser", fields: [user_id], references: [id])
-  approved_by    User? @relation("ApprovedByUser", fields: [approved_by_user_id], references: [id])
+  shift       Shift @relation(fields: [shift_id], references: [id])
+  user        User  @relation("ClockInUser", fields: [user_id], references: [id])
+  approved_by User? @relation("ApprovedByUser", fields: [approved_by_user_id], references: [id])
 }
 
 enum AvailabilityType {
@@ -529,28 +616,28 @@ enum AvailabilityType {
 }
 
 model AvailabilitySlot {
-  id               String           @id @default(uuid())
-  user_id          String
-  start_time       DateTime
-  end_time         DateTime
+  id                String           @id @default(uuid())
+  user_id           String
+  start_time        DateTime
+  end_time          DateTime
   availability_type AvailabilityType
-  created_at       DateTime         @default(now())
+  created_at        DateTime         @default(now())
 
   user User @relation(fields: [user_id], references: [id])
 }
 
 // 8. Learning Management & Leaderboards
 model TrainingModule {
-  id              String   @id @default(uuid())
-  organisation_id String
-  title           String
-  description     String?
-  content_url     String?
-  content         String?
+  id                String   @id @default(uuid())
+  organisation_id   String
+  title             String
+  description       String?
+  content_url       String?
+  content           String?
   estimated_minutes Int
-  category        String
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  category          String
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 
   organisation Organisation         @relation(fields: [organisation_id], references: [id])
   assignments  TrainingAssignment[]
@@ -573,20 +660,230 @@ model TrainingAssignment {
   created_at         DateTime                 @default(now())
   updated_at         DateTime                 @updatedAt
 
-  training_module TrainingModule @relation(fields: [training_module_id], references: [id])
-  user            User           @relation(fields: [user_id], references: [id])
+  training_module TrainingModule  @relation(fields: [training_module_id], references: [id])
+  user            User            @relation(fields: [user_id], references: [id])
   result          TrainingResult?
 }
 
 model TrainingResult {
-  id                     String             @id @default(uuid())
-  training_assignment_id String             @unique
+  id                     String   @id @default(uuid())
+  training_assignment_id String   @unique
   completed_at           DateTime
   score                  Float?
   passed                 Boolean?
-  created_at             DateTime           @default(now())
+  created_at             DateTime @default(now())
 
   training_assignment TrainingAssignment @relation(fields: [training_assignment_id], references: [id])
+}
+
+// 10. Audits & inspections
+enum AuditStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model AuditTemplate {
+  id              String   @id @default(uuid())
+  organisation_id String
+  name            String
+  description     String?
+  sections        Json
+  recurrence_rule String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  organisation Organisation @relation(fields: [organisation_id], references: [id])
+  audits       Audit[]
+}
+
+model Audit {
+  id             String      @id @default(uuid())
+  template_id    String
+  location_id    String
+  scheduled_date DateTime
+  performed_at   DateTime?
+  performed_by   String?
+  score          Float?
+  status         AuditStatus @default(SCHEDULED)
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+
+  template           AuditTemplate      @relation(fields: [template_id], references: [id])
+  location           Location           @relation(fields: [location_id], references: [id])
+  performed_by_user  User?              @relation("AuditPerformed", fields: [performed_by], references: [id])
+  responses          AuditResponse[]
+  corrective_actions CorrectiveAction[]
+}
+
+model AuditResponse {
+  id              String   @id @default(uuid())
+  audit_id        String
+  question_ref    String
+  response        Json?
+  non_conformance Boolean  @default(false)
+  evidence_urls   Json?
+  created_at      DateTime @default(now())
+
+  audit              Audit              @relation(fields: [audit_id], references: [id])
+  corrective_actions CorrectiveAction[]
+}
+
+enum CorrectiveActionStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CLOSED_REJECTED
+}
+
+model CorrectiveAction {
+  id                    String                 @id @default(uuid())
+  organisation_id       String
+  audit_response_id     String?
+  checklist_run_item_id String?
+  description           String
+  assigned_to_user_id   String?
+  created_by_user_id    String
+  due_date              DateTime?
+  status                CorrectiveActionStatus @default(OPEN)
+  completion_notes      String?
+  completed_at          DateTime?
+  created_at            DateTime               @default(now())
+  updated_at            DateTime               @updatedAt
+
+  organisation       Organisation       @relation(fields: [organisation_id], references: [id])
+  audit_response     AuditResponse?     @relation(fields: [audit_response_id], references: [id])
+  checklist_run_item ChecklistRunItem?  @relation(fields: [checklist_run_item_id], references: [id])
+  assigned_to        User?              @relation("AssignedActions", fields: [assigned_to_user_id], references: [id])
+  created_by         User               @relation("CreatedActions", fields: [created_by_user_id], references: [id])
+  audit              Audit?             @relation(fields: [auditId], references: [id])
+  auditId            String?
+  temperatureAlerts  TemperatureAlert[]
+}
+
+// 11. Incident logging
+enum IncidentType {
+  FOOD_COMPLAINT
+  STAFF_INJURY
+  NEAR_MISS
+  GUEST_SLIP_FALL
+  EQUIPMENT_FAILURE
+  OTHER
+}
+
+enum IncidentStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+model IncidentReport {
+  id                 String         @id @default(uuid())
+  organisation_id    String
+  location_id        String
+  type               IncidentType
+  description        String
+  occurred_at        DateTime
+  people_involved    String?
+  immediate_action   String?
+  follow_up_actions  String?
+  status             IncidentStatus @default(OPEN)
+  created_by_user_id String
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+
+  organisation Organisation @relation(fields: [organisation_id], references: [id])
+  location     Location     @relation(fields: [location_id], references: [id])
+  created_by   User         @relation(fields: [created_by_user_id], references: [id])
+}
+
+// 12. Temperature sensors & alerts
+enum DeviceType {
+  FRIDGE
+  FREEZER
+  HOT_HOLD
+  PROBE
+  AMBIENT
+}
+
+model Device {
+  id              String     @id @default(uuid())
+  organisation_id String
+  location_id     String
+  name            String
+  type            DeviceType
+  serial_number   String?
+  safe_range_min  Float?
+  safe_range_max  Float?
+  status          Boolean    @default(true)
+  created_at      DateTime   @default(now())
+  updated_at      DateTime   @updatedAt
+
+  organisation Organisation         @relation(fields: [organisation_id], references: [id])
+  location     Location             @relation(fields: [location_id], references: [id])
+  readings     TemperatureReading[]
+  alerts       TemperatureAlert[]
+}
+
+enum TemperatureStatus {
+  OK
+  WARNING
+  CRITICAL
+  BELOW_RANGE
+  ABOVE_RANGE
+}
+
+enum ReadingSource {
+  SENSOR
+  MANUAL
+}
+
+model TemperatureReading {
+  id            String            @id @default(uuid())
+  device_id     String
+  user_id       String?
+  recorded_at   DateTime
+  temperature_c Float
+  status        TemperatureStatus
+  source        ReadingSource
+  created_at    DateTime          @default(now())
+
+  device Device @relation(fields: [device_id], references: [id])
+  user   User?  @relation(fields: [user_id], references: [id])
+}
+
+model TemperatureAlert {
+  id               String            @id @default(uuid())
+  device_id        String
+  triggered_at     DateTime
+  resolved_at      DateTime?
+  severity         TemperatureStatus
+  description      String?
+  linked_action_id String?
+
+  device        Device            @relation(fields: [device_id], references: [id])
+  linked_action CorrectiveAction? @relation(fields: [linked_action_id], references: [id])
+}
+
+// 13. Attendance rollups
+model DailyTimesheet {
+  id                  String    @id @default(uuid())
+  user_id             String
+  location_id         String
+  date                DateTime
+  total_worked        Float
+  total_breaks        Float
+  status              String
+  approved_by_user_id String?
+  approved_at         DateTime?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  user        User     @relation("TimesheetOwner", fields: [user_id], references: [id])
+  location    Location @relation(fields: [location_id], references: [id])
+  approved_by User?    @relation("TimesheetApprovedBy", fields: [approved_by_user_id], references: [id])
 }
 
 enum GamificationSourceType {
@@ -610,14 +907,14 @@ model GamificationPoint {
 }
 
 model VenueScore {
-  id                        String   @id @default(uuid())
-  location_id               String
-  week_start                DateTime
-  week_end                  DateTime
-  total_points              Int
-  average_points_per_staff  Float
-  rank_within_org           Int?
-  created_at                DateTime @default(now())
+  id                       String   @id @default(uuid())
+  location_id              String
+  week_start               DateTime
+  week_end                 DateTime
+  total_points             Int
+  average_points_per_staff Float
+  rank_within_org          Int?
+  created_at               DateTime @default(now())
 
   location Location @relation(fields: [location_id], references: [id])
 }
