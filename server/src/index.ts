@@ -12,6 +12,7 @@ import shiftRoutes from './modules/shifts/shifts.routes';
 import trainingRoutes from './modules/training/training.routes';
 import notificationRoutes from './modules/notifications/notifications.routes';
 import leaderboardRoutes from './modules/leaderboard/leaderboard.routes';
+import overviewRoutes from './modules/overview/overview.routes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -35,6 +36,7 @@ app.use('/api', shiftRoutes);
 app.use('/api', trainingRoutes);
 app.use('/api', notificationRoutes);
 app.use('/api', leaderboardRoutes);
+app.use('/api/experience', overviewRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
