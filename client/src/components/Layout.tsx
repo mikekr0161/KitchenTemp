@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { getMyOrganisation } from '../api/organisations';
@@ -37,9 +37,14 @@ const Layout = () => {
           <ul className="space-y-2 text-sm font-medium text-slate-700">
             {navSections.map((nav) => (
               <li key={nav.to}>
-                <Link className="block rounded px-3 py-2 hover:bg-slate-100" to={nav.to}>
+                <NavLink
+                  className={({ isActive }) =>
+                    `block rounded px-3 py-2 transition ${isActive ? 'bg-slate-900 text-white shadow-sm' : 'hover:bg-slate-100'}`
+                  }
+                  to={nav.to}
+                >
                   {nav.label}
-                </Link>
+                </NavLink>
               </li>
             ))}
           </ul>
